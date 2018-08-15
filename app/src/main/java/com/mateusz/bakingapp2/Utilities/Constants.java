@@ -20,6 +20,7 @@ public class Constants {
     public static final String JSON_KEY_STEP_THUMBNAIL_URL = "thumbnailURL";
 
     public static final String INTENT_EXTRA_RECIPE_KEY = "extraRecipe";
+    public static final String INTENT_EXTRA_OTHER_KEY = "extraOtherKey";
 
     public static final String STEPS_LIST_STEPS = "listSteps";
     public static final String STEPS_LIST_INDEX = "listStepsIndex";
