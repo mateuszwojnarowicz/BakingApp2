@@ -9,17 +9,16 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.mateusz.bakingapp2.Model.Recipe;
 import com.mateusz.bakingapp2.Model.Step;
 import com.mateusz.bakingapp2.R;
-
-import java.util.List;
 
 public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepHolder> {
 
     private final Context mContext;
-    private final List<Step> mData;
+    private final Recipe mData;
 
-    public StepsAdapter(Context context, List<Step> data){
+    public StepsAdapter(Context context, Recipe data){
         this.mContext=context;
         this.mData=data;
     }
@@ -34,17 +33,16 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepHolder> 
 
     @Override
     public void onBindViewHolder(@NonNull final StepsAdapter.StepHolder holder, int position) {
-        final Step step = mData.get(holder.getAdapterPosition());
-        if(holder.getAdapterPosition()==0){
-            holder.setTextViewName(step.getStringShortDescription());
-        } else {
-            holder.setTextViewName(holder.getAdapterPosition()+". "+step.getStringShortDescription());
-        }
+
+        final Step step = mData.getListSteps().get(holder.getAdapterPosition());
+        holder.setTextViewName(step.getStringShortDescription());
+        holder.setTextViewName(holder.getAdapterPosition()+". "+step.getStringShortDescription());
+
     }
 
     @Override
     public int getItemCount() {
-        return mData.size();
+        return mData.getListSteps().size();
     }
 
     public class StepHolder extends RecyclerView.ViewHolder{

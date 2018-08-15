@@ -23,5 +23,6 @@ public class Constants {
 
     public static final String STEPS_LIST_STEPS = "listSteps";
     public static final String STEPS_LIST_INDEX = "listStepsIndex";
+    public static final String SHARED_PREFERENCES_NAME="sharedPreferencesBakingAPpp";
 
 }

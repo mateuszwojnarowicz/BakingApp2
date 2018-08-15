@@ -10,16 +10,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.mateusz.bakingapp2.Model.Ingredient;
+import com.mateusz.bakingapp2.Model.Recipe;
 import com.mateusz.bakingapp2.R;
-
-import java.util.List;
 
 public class IngredientsAdapter extends RecyclerView.Adapter<IngredientsAdapter.IngredientHolder> {
 
     private final Context mContext;
-    private final List<Ingredient> mData;
+    private final Recipe mData;
 
-    public IngredientsAdapter(Context context, List<Ingredient> data){
+    public IngredientsAdapter(Context context, Recipe data){
         this.mContext=context;
         this.mData=data;
     }
@@ -34,7 +33,7 @@ public class IngredientsAdapter extends RecyclerView.Adapter<IngredientsAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull final IngredientsAdapter.IngredientHolder holder, int position) {
-        final Ingredient ingredient = mData.get(holder.getAdapterPosition());
+        final Ingredient ingredient = mData.getListIngredients().get(holder.getAdapterPosition());
         holder.setTextViewIngredient("- "+ingredient.getStringIngredient());
         holder.setTextViewQuantity(getQuantity(ingredient.getDoubleQuantity())+" "+ingredient.getStringMeasure());
     }
@@ -49,7 +48,7 @@ public class IngredientsAdapter extends RecyclerView.Adapter<IngredientsAdapter.
 
     @Override
     public int getItemCount() {
-        return mData.size();
+        return mData.getListIngredients().size();
     }
 
     public class IngredientHolder extends RecyclerView.ViewHolder{

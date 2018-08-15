@@ -11,17 +11,13 @@ import android.view.ViewGroup;
 
 import com.mateusz.bakingapp2.Adapter.IngredientsAdapter;
 import com.mateusz.bakingapp2.Adapter.StepsAdapter;
-import com.mateusz.bakingapp2.Model.Ingredient;
-import com.mateusz.bakingapp2.Model.Step;
-
-import java.util.List;
+import com.mateusz.bakingapp2.Model.Recipe;
 
 public class MasterFragment extends Fragment {
 
     private IngredientsAdapter mIngredientsAdapter;
     private StepsAdapter mStepsAdapter;
-    private List<Ingredient> mListIngredients;
-    private List<Step> mListSteps;
+    private Recipe mData;
 
 
 
@@ -29,9 +25,8 @@ public class MasterFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public void setData(List<Ingredient> ingredients, List<Step> steps){
-        mListIngredients=ingredients;
-        mListSteps=steps;
+    public void setData(Recipe data){
+        mData=data;
     }
 
 
@@ -51,7 +46,7 @@ public class MasterFragment extends Fragment {
         RecyclerView recyclerViewIngredients = rootView.findViewById(R.id.fragment_master_recycler_view_ingredients);
         recyclerViewIngredients.setLayoutManager(ingredientsManager);
         recyclerViewIngredients.setHasFixedSize(true);
-        mIngredientsAdapter = new IngredientsAdapter(getContext(), mListIngredients);
+        mIngredientsAdapter = new IngredientsAdapter(getContext(), mData);
         recyclerViewIngredients.setAdapter(mIngredientsAdapter);
 
         LinearLayoutManager stepsManager = new LinearLayoutManager(getContext());
@@ -62,7 +57,7 @@ public class MasterFragment extends Fragment {
                 stepsManager.getOrientation());
         recyclerView.addItemDecoration(dividerItemDecoration);
         recyclerView.setHasFixedSize(true);
-        mStepsAdapter = new StepsAdapter(getContext(), mListSteps);
+        mStepsAdapter = new StepsAdapter(getContext(), mData);
         recyclerView.setAdapter(mStepsAdapter);
 
         return rootView;
