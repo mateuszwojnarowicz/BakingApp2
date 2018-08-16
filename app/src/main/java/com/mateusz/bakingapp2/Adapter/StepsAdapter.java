@@ -79,7 +79,7 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepHolder> 
     public static void savePosition(int position, Context mContext){
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, mContext.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt("position", position);
+        editor.putInt(Constants.SHARED_PREFERENCES_KEY_POSITION, position);
         editor.apply();
     }
 }

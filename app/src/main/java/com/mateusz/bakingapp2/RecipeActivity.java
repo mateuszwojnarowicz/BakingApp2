@@ -1,6 +1,5 @@
 package com.mateusz.bakingapp2;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -29,7 +28,7 @@ public class RecipeActivity extends AppCompatActivity {
         Intent intent = getIntent();
         recipe = intent.getParcelableExtra(Constants.INTENT_EXTRA_RECIPE_KEY);
         if(recipe!=null) {
-            saveData(this);
+            saveData();
         } else {
             recipe=loadData(this);
         }
@@ -50,32 +49,20 @@ public class RecipeActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if (requestCode == 1) {
-            if(resultCode == Activity.RESULT_OK){
-                recipe= data.getParcelableExtra("result");
-            }
-            if (resultCode == Activity.RESULT_CANCELED) {
-                //Write your code if there's no result
-            }
-        }
-    }
-
-    public void saveData(Context context){
+    public void saveData(){
         SharedPreferences sharedPreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
         String json = gson.toJson(recipe);
-        editor.putString("recipe", json);
+        editor.putString(Constants.SHARED_PREFERENCES_KEY_RECIPE, json);
         editor.apply();
     }
 
     public static Recipe loadData(Context context){
         SharedPreferences sharedPreferences = context.getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, context.MODE_PRIVATE);
         Gson gson = new Gson();
-        String json = sharedPreferences.getString("recipe", null);
+        String json = sharedPreferences.getString(Constants.SHARED_PREFERENCES_KEY_RECIPE, null);
         Type type = new TypeToken<Recipe>(){}.getType();
         return gson.fromJson(json, type);
     }

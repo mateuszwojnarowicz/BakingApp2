@@ -46,7 +46,7 @@ public class IngredientsWidget extends AppWidgetProvider {
     public static Recipe loadData(Context mContext) {
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, mContext.MODE_PRIVATE);
         Gson gson = new Gson();
-        String json = sharedPreferences.getString("recipe", null);
+        String json = sharedPreferences.getString(Constants.SHARED_PREFERENCES_KEY_RECIPE, null);
         Type type = new TypeToken<Recipe>() {
         }.getType();
         return gson.fromJson(json, type);

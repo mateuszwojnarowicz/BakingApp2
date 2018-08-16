@@ -35,7 +35,7 @@ public class WidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsF
     public static Recipe loadData(Context context){
         SharedPreferences sharedPreferences = context.getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, context.MODE_PRIVATE);
         Gson gson = new Gson();
-        String json = sharedPreferences.getString("recipe", null);
+        String json = sharedPreferences.getString(Constants.SHARED_PREFERENCES_KEY_RECIPE, null);
         Type type = new TypeToken<Recipe>(){}.getType();
         return gson.fromJson(json, type);
     }

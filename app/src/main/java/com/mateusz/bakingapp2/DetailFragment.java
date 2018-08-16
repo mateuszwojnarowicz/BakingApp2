@@ -79,14 +79,15 @@ public class DetailFragment extends Fragment {
         buttonPrevoius.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                releasePlayer();
                 mPosition--;
                 savePosition(mPosition, getActivity());
-                player.stop();
             }
         });
         buttonNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                releasePlayer();
                 mPosition++;
                 savePosition(mPosition, getActivity());
             }
@@ -131,13 +132,13 @@ public class DetailFragment extends Fragment {
     public static void savePosition(int position, Context mContext){
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, mContext.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt("position", position);
+        editor.putInt(Constants.SHARED_PREFERENCES_KEY_POSITION, position);
         editor.apply();
     }
 
     public static int loadPosition(Context context){
         SharedPreferences sharedPreferences = context.getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, context.MODE_PRIVATE);
-        int position = sharedPreferences.getInt("position", 0);
+        int position = sharedPreferences.getInt(Constants.SHARED_PREFERENCES_KEY_POSITION, 0);
         return position;
     }
 
@@ -237,6 +238,12 @@ public class DetailFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(listener);
+    }
+
+
+    @Override
+    public void onStop() {
+        super.onStop();
         releasePlayer();
     }
 
@@ -245,16 +252,21 @@ public class DetailFragment extends Fragment {
         super.onStart();
     }
 
+
+
     @Override
     public void onPause() {
         super.onPause();
     }
 
     private void releasePlayer() {
+        if(player!=null){
         player.stop();
         player.release();
-        player = null;
+        player = null;}
     }
+
+
 
 
 
