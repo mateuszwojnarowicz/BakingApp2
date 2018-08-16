@@ -37,9 +37,12 @@ public class RecipeActivity extends AppCompatActivity {
         setTitle(recipe.getStringName());
         MasterFragment recipeFragment = new MasterFragment();
         recipeFragment.setData(recipe);
+        recipeFragment.setRetainInstance(true);
         getSupportFragmentManager().beginTransaction().add(R.id.recipe_fragment_container, recipeFragment).commit();
         if(getResources().getBoolean(R.bool.isTablet)){
             DetailFragment detailFragment = new DetailFragment();
+            detailFragment.setData(recipe);
+            detailFragment.setRetainInstance(true);
             getSupportFragmentManager().beginTransaction().add(R.id.step_fragment_container, detailFragment).commit();
         }
 

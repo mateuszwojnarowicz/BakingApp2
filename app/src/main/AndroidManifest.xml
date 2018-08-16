@@ -26,6 +26,7 @@
                 android:value=".MainActivity" />
         </activity>
         <activity android:name=".DetailPhoneActivity"
+            android:configChanges="orientation|screenSize"
             android:parentActivityName=".RecipeActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

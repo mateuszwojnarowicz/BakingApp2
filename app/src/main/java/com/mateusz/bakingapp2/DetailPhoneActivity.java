@@ -17,9 +17,18 @@ public class DetailPhoneActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detail_phone);
         Intent intent = getIntent();
         recipe = intent.getParcelableExtra(Constants.INTENT_EXTRA_OTHER_KEY);
-        DetailFragment detailFragment = new DetailFragment();
+
+
+        final DetailFragment detailFragment = new DetailFragment();
+        detailFragment.setData(recipe);
+        detailFragment.setRetainInstance(true);
         getSupportFragmentManager().beginTransaction().add(R.id.step_phone_fragment_container, detailFragment).commit();
+
+
     }
 
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
 }

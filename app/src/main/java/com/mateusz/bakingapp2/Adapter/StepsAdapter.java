@@ -2,6 +2,7 @@ package com.mateusz.bakingapp2.Adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -49,6 +50,8 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepHolder> 
                     intent.putExtra(Constants.INTENT_EXTRA_OTHER_KEY, mData);
                     mContext.startActivity(intent);
                 }
+                savePosition(holder.getAdapterPosition(), mContext);
+
             }
         });
     }
@@ -71,5 +74,12 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepHolder> 
         }
 
         public void setTextViewName(String title){textViewName.setText(title);}
+    }
+
+    public static void savePosition(int position, Context mContext){
+        SharedPreferences sharedPreferences = mContext.getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, mContext.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt("position", position);
+        editor.apply();
     }
 }
