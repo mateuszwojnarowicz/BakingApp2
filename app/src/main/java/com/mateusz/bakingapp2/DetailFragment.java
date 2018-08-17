@@ -22,8 +22,8 @@ import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
-import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
@@ -60,6 +60,9 @@ public class DetailFragment extends Fragment {
     SharedPreferences sharedPreferences;
     Handler mainHandler;
     SimpleExoPlayer player;
+    private long mCurrentPosition = 0;
+    private boolean mPlayWhenReady = true;
+
 
     public DetailFragment() {
         // Required empty public constructor
@@ -73,27 +76,62 @@ public class DetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
-        mUnbinder = ButterKnife.bind(this, rootView);
+        if (savedInstanceState != null && savedInstanceState.containsKey(Constants.SHARED_PREFERENCES_VIDEO_POSITION)) {
+            mCurrentPosition = savedInstanceState.getLong(Constants.SHARED_PREFERENCES_VIDEO_POSITION);
+            mPlayWhenReady = savedInstanceState.getBoolean(Constants.SHARED_PREFERENCES_VIDEO_READY);
+        }
+            mUnbinder = ButterKnife.bind(this, rootView);
         updateFields();
 
         buttonPrevoius.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 releasePlayer();
+                mCurrentPosition=0;
+                mPlayWhenReady=true;
                 mPosition--;
                 savePosition(mPosition, getActivity());
+
             }
         });
         buttonNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 releasePlayer();
+                mCurrentPosition=0;
+                mPlayWhenReady=true;
                 mPosition++;
                 savePosition(mPosition, getActivity());
+
             }
         });
         return rootView;
 
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putLong(Constants.SHARED_PREFERENCES_VIDEO_POSITION, mCurrentPosition);
+        outState.putBoolean(Constants.SHARED_PREFERENCES_VIDEO_READY, mPlayWhenReady);
+    }
+
+    private void initializeExoPlayer(String string) {
+        if (player == null) {
+            DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+            TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
+            TrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
+            player = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector);
+            videoView.setPlayer(player);
+            DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(getContext(), Util.getUserAgent(getContext(), getString(R.string.app_name)), bandwidthMeter);
+            MediaSource videoSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(Uri.parse(string));
+            player.prepare(videoSource);
+            if (mCurrentPosition != 0)
+                player.seekTo(mCurrentPosition);
+            player.setPlayWhenReady(mPlayWhenReady);
+            videoView.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -149,13 +187,10 @@ public class DetailFragment extends Fragment {
             videoView.setVisibility(View.GONE);
         } else {
             if(isOnline()){
-                videoView.setVisibility(View.VISIBLE);
-                playerInit();
-                videoView.setPlayer(player);
                 if(!mStep.getStringVideoURL().isEmpty()){
-                    player.prepare(getMediaSource(mStep.getStringVideoURL()));
+                    initializeExoPlayer(mStep.getStringVideoURL());
                 } else {
-                    player.prepare(getMediaSource(mStep.getStringThumbnailURL()));
+                    initializeExoPlayer(mStep.getStringThumbnailURL());
                 }
 
             }
@@ -176,15 +211,6 @@ public class DetailFragment extends Fragment {
         textViewTitle.setText(mStep.getStringShortDescription());
         textViewDescription.setText(mStep.getStringDescription());
         textViewStep.setText("STEP "+String.valueOf(mPosition)+"/"+String.valueOf(mData.getListSteps().size()-1));
-    }
-
-    private MediaSource getMediaSource(String s){
-        DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(getActivity(),
-                Util.getUserAgent(getActivity(), "BakingApp2"), bandwidthMeter);
-        MediaSource videoSource = new ExtractorMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(Uri.parse(s));
-        return videoSource;
     }
 
 
@@ -219,15 +245,6 @@ public class DetailFragment extends Fragment {
         mainHandler = new Handler();
     }
 
-    private void playerInit(){
-        BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-        TrackSelection.Factory videoTrackSelectionFactory =
-                new AdaptiveTrackSelection.Factory(bandwidthMeter);
-        DefaultTrackSelector trackSelector =
-            new DefaultTrackSelector(videoTrackSelectionFactory);
-        player = ExoPlayerFactory.newSimpleInstance(getActivity(), trackSelector);
-    }
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -240,6 +257,22 @@ public class DetailFragment extends Fragment {
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(listener);
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        if(mStep.getStringThumbnailURL().isEmpty()&&mStep.getStringVideoURL().isEmpty()){
+            videoView.setVisibility(View.GONE);
+        } else {
+            if(isOnline()){
+                if(!mStep.getStringVideoURL().isEmpty()){
+                    initializeExoPlayer(mStep.getStringVideoURL());
+                } else {
+                    initializeExoPlayer(mStep.getStringThumbnailURL());
+                }
+
+            }
+        }
+    }
 
     @Override
     public void onStop() {
@@ -247,23 +280,21 @@ public class DetailFragment extends Fragment {
         releasePlayer();
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-
 
     @Override
     public void onPause() {
         super.onPause();
+        releasePlayer();
     }
 
     private void releasePlayer() {
         if(player!=null){
-        player.stop();
-        player.release();
-        player = null;}
+            mPlayWhenReady = player.getPlayWhenReady();
+            mCurrentPosition = player.getCurrentPosition();
+            player.stop();
+            player.release();
+            player = null;
+        }
     }
 
 

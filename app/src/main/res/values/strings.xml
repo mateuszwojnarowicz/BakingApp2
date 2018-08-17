@@ -4,8 +4,7 @@
     <string name="ingredient_message">Ingredients for This Recipe</string>
     <string name="button_left">Previous</string>
     <string name="button_right">Next</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
+    <string name="error_message">An error occurred :(\nPlease verify that you are connected to the internet and reopen the app.</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="appwidget_text">EXAMPLE</string>
     <string name="add_widget">Add widget</string>

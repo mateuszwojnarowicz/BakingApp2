@@ -1,16 +1,20 @@
 package com.mateusz.bakingapp2;
 
 import android.annotation.SuppressLint;
-import android.support.v4.app.LoaderManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.mateusz.bakingapp2.Adapter.MainAdapter;
 import com.mateusz.bakingapp2.Model.Ingredient;
 import com.mateusz.bakingapp2.Model.Recipe;
@@ -23,6 +27,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +38,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @BindView(R.id.main_recycler_view)
     RecyclerView recyclerView;
+    @BindView(R.id.activity_main_error_text_view)
+    TextView textView;
 
     private List<Recipe> mRecipes;
     private Loader<List<Recipe>> loader;
@@ -40,10 +47,15 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-
+        if (savedInstanceState!=null&&mRecipes.isEmpty()) {
+            if(savedInstanceState.containsKey(Constants.SAVED_STATE_KEY_RECIPES)){
+                mRecipes = stringToRecipes(savedInstanceState.getString(Constants.SAVED_STATE_KEY_RECIPES));
+            }
+        }
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setHasFixedSize(true);
@@ -52,17 +64,70 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         loaderManager = getSupportLoaderManager();
         loader = loaderManager.getLoader(Constants.LOADER_RECIPES_ID);
         mRecipes = new ArrayList<Recipe>();
-        makeOperationLoadRecipes();
 
         Log.e("SIZE", String.valueOf(mRecipes.size()));
     }
 
+
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        makeOperationLoadRecipes();
+    }
+
+
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState!=null&&mRecipes.isEmpty()) {
+            if(savedInstanceState.containsKey(Constants.SAVED_STATE_KEY_RECIPES)){
+                mRecipes = stringToRecipes(savedInstanceState.getString(Constants.SAVED_STATE_KEY_RECIPES));
+            }
+        }
+
+    }
+
+    public String recipesToString(List<Recipe> recipes){
+        Gson gson = new Gson();
+        String json = gson.toJson(recipes);
+        return json;
+    }
+
+    public List<Recipe> stringToRecipes(String string){
+        Gson gson = new Gson();
+        Type type = new TypeToken<List<Recipe>>(){}.getType();
+        List<Recipe> recipes = gson.fromJson(string, type);
+        return recipes;
+    }
+
+    boolean isOnline() {
+        Runtime runtime = Runtime.getRuntime();
+        try {
+            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
+            int     exitValue = ipProcess.waitFor();
+            return (exitValue == 0);
+        }
+        catch (IOException e)          { e.printStackTrace(); }
+        catch (InterruptedException e) { e.printStackTrace(); }
+
+        return false;
+    }
+
     private void makeOperationLoadRecipes(){
-        Bundle bundle = new Bundle();
-        if(loader==null){
-            loaderManager.initLoader(Constants.LOADER_RECIPES_ID, bundle, this);
-        }else{
-            loaderManager.restartLoader(Constants.LOADER_RECIPES_ID, bundle, this);
+        if(isOnline()&&mRecipes.isEmpty()) {
+            textView.setVisibility(View.GONE);
+            Bundle bundle = new Bundle();
+            if (loader == null) {
+                loaderManager.initLoader(Constants.LOADER_RECIPES_ID, bundle, this);
+            } else {
+                loaderManager.restartLoader(Constants.LOADER_RECIPES_ID, bundle, this);
+            }
+        } else if (mRecipes.isEmpty()){
+            textView.setVisibility(View.VISIBLE);
+            textView.setText(R.string.error_message);
         }
 
     }
